@@ -1,14 +1,14 @@
 import requests
+from json import loads
+from re import sub
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 ' \
              'Safari / 537.36'
-
 url = 'https://leetcode-cn.com/'
 
 
 class Main:
     def __init__(self, args):
-        from json import loads
         self.path = args.path + '\\'
         self.level = args.difficulty
         self.format = args.format
@@ -20,6 +20,7 @@ class Main:
             self.password = f['password']
         self.login()
         self.problem_list()
+
         for i in [i['stat'] for i in self.list]:
             info = self.download_info(i['question__title_slug'])
             if i['is_new_question']:
@@ -74,6 +75,7 @@ class Main:
     def download_info(self, slug):
         from json import dumps
         from html import unescape
+
         params = {'operationName': 'questionData',
                   'variables': {'titleSlug': slug},
                   'query': '''query questionData($titleSlug: String!) {
@@ -95,10 +97,13 @@ class Main:
 
     def save_markdown(self, title, content):
         from html2text import html2text
+
+        title = sub('[\/:*?"<>|]', '', title)
         with open(self.path + title + '.md', 'w', encoding='utf-8') as f:
             f.write('# {}\n{}'.format(title, html2text(content)))
 
     def save_text(self, title, content):
+        title = sub('[\/:*?"<>|]', '', title)
         with open(self.path + title + '.txt', 'w', encoding='utf-8') as f:
             f.write('{}\n{}'.format(title, content))
 
