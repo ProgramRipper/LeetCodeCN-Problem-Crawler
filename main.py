@@ -74,10 +74,10 @@ class Main:
             info = self.download_info(i['stat']['question__title_slug'])
 
             if self.lang == 'en':
-                title = '{}.{}'.format(info['questionFrontendId'], info['title'])
+                title = f"{info['questionFrontendId']}.{info['title']}"
                 content = info['content']
             elif self.lang == 'zh-CN':
-                title = '{}.{}'.format(info['questionFrontendId'], info['translatedTitle'])
+                title = f"{info['questionFrontendId']}.{info['translatedTitle']}"
                 content = info['translatedContent']
             if content is None:
                 continue
@@ -91,12 +91,16 @@ class Main:
     def login(self):
         while True:
             try:
-                self.session.get(url + 'accounts/login/')
+                self.session.get(f'{url}accounts/login/')
                 data = {'login': self.account,
                         'password': self.password
                         }
-                response = self.session.post(url + 'accounts/login/', data=data,
-                                             headers=dict(Referer=url + 'accounts/login/'))
+                response = self.session.post(
+                    f'{url}accounts/login/',
+                    data=data,
+                    headers=dict(Referer=url + 'accounts/login/'),
+                )
+
 
                 if response.ok:
                     print('Login successfully!')
@@ -105,10 +109,10 @@ class Main:
                 print('Login failed! Wait till next round!')
 
     def problem_list(self) -> list:
-        headers = {
-            'Referer': url + 'problems/'
-        }
-        return self.session.get(url + 'api/problems/all/', headers=headers).json()['stat_status_pairs']
+        headers = {'Referer': f'{url}problems/'}
+        return self.session.get(f'{url}api/problems/all/', headers=headers).json()[
+            'stat_status_pairs'
+        ]
 
     def download_info(self, slug):
         params = {'operationName': 'questionData',
@@ -124,11 +128,13 @@ class Main:
                 }
             }'''
                   }
-        headers = {
-            'Referer': url + 'problems/' + slug
-        }
+        headers = {'Referer': f'{url}problems/{slug}'}
         data = dumps(params).encode('utf-8')
-        return unescape(self.session.post(url + 'graphql/', data=data, headers=headers).json()['data']['question'])
+        return unescape(
+            self.session.post(f'{url}graphql/', data=data, headers=headers).json()[
+                'data'
+            ]['question']
+        )
 
     def save_markdown(self, title, content):
         title = sub('[\/:*?"<>|]', '', title)
